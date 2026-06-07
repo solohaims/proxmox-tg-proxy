@@ -157,14 +157,27 @@ printf " OK\n"
 printf "${GREEN}Установка зависимостей и tg-ws-proxy...${NC}\n"
 pct exec "$CTID" -- bash -c "
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update && apt-get install -y python3 python3-venv python3-pip git build-essential libffi-dev libssl-dev tini curl
+    apt-get update
+    # Установка необходимых пакетов (включая временные для сборки)
+    apt-get install -y python3 python3-venv python3-pip git build-essential libffi-dev libssl-dev tini curl
+    
     useradd -r -m -s /bin/bash tgproxy || true
     rm -rf /opt/tg-ws-proxy
     git clone https://github.com/Flowseal/tg-ws-proxy.git /opt/tg-ws-proxy
     cd /opt/tg-ws-proxy
+    
+    # Настройка Python окружения
     python3 -m venv venv
     ./venv/bin/pip install --upgrade pip
-    ./venv/bin/pip install cryptography==46.0.5
+    ./venv/bin/pip install --no-cache-dir cryptography==46.0.5
+    
+    # Очистка: удаляем инструменты сборки и кэши для экономии места
+    apt-get purge -y build-essential libffi-dev libssl-dev
+    apt-get autoremove -y
+    apt-get clean
+    rm -rf /root/.cache/pip
+    rm -rf /var/lib/apt/lists/*
+    
     chown -R tgproxy:tgproxy /opt/tg-ws-proxy
 "
 
