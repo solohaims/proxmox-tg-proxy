@@ -107,7 +107,16 @@ read -r WORKER < /dev/tty
 
 # --- Выполнение ---
 ROOT_PASS=$(openssl rand -base64 12)
-TEMPLATE_NAME="debian-12-standard_12.2-1_amd64.tar.zst"
+
+# Динамический поиск актуального шаблона Debian 12
+printf "${BLUE}Поиск актуального шаблона Debian 12...${NC}\n"
+pveam update > /dev/null
+TEMPLATE_NAME=$(pveam available --section system | grep "debian-12-standard" | awk '{print $2}' | head -n 1)
+
+if [ -z "$TEMPLATE_NAME" ]; then
+    printf "${RED}Ошибка: Не удалось найти шаблон Debian 12 в репозитории Proxmox!${NC}\n"
+    exit 1
+fi
 
 # Поиск хранилища для шаблонов
 TEMP_STORE=$(pvesm status -content vztmpl | awk 'NR>1 {print $1}' | head -n 1)
@@ -119,8 +128,7 @@ fi
 TEMPLATE_PATH=$(pvesm path "$TEMP_STORE:vztmpl/$TEMPLATE_NAME" 2>/dev/null || echo "")
 
 if [ ! -f "$TEMPLATE_PATH" ]; then
-    printf "${BLUE}Загрузка шаблона Debian 12 в хранилище '$TEMP_STORE'...${NC}\n"
-    pveam update
+    printf "${BLUE}Загрузка шаблона $TEMPLATE_NAME в хранилище '$TEMP_STORE'...${NC}\n"
     pveam download "$TEMP_STORE" "$TEMPLATE_NAME"
 fi
 
