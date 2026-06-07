@@ -1,8 +1,15 @@
 # Telegram MTProto WS Proxy for Proxmox (LXC)
 
+[English](#english) | [Русский](#русский)
+
+---
+
+<a name="english"></a>
+## English
+
 Native Telegram MTProto Proxy with WebSocket stealth (via Cloudflare Workers) inside a Proxmox LXC container.
 
-## 🚀 Quick Install
+### 🚀 Quick Install
 
 Run this command in your Proxmox VE shell:
 
@@ -10,7 +17,7 @@ Run this command in your Proxmox VE shell:
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/solohaims/proxmox-tg-proxy/main/install_tg_proxy.sh)"
 ```
 
-## 🛠 Features (v2.1)
+### 🛠 Features (v2.1)
 - **Russian Localization:** Full UI and prompts in Russian.
 - **Improved UI:** Arrow-key navigation for storage and resource selection.
 - **Hardened Security:** 
@@ -18,15 +25,60 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/solohaims/proxmox-tg-pro
   - Generates a **random root password** for every installation.
   - Systemd hardening (`ProtectSystem`, `PrivateTmp`).
 - **Resource Profiles:** Choose between Eco, Standard, or Performance settings.
-- **Native Performance:** Python-native installation (no Docker overhead).
+- **Clean Installation:** Automatically removes build dependencies and caches to save space.
 - **WS Stealth:** Bypasses DPI by routing traffic through Cloudflare Workers.
 - **Automatic Setup:** Handles template downloading, network waiting, and service configuration.
 
-## ☁️ Cloudflare Worker Setup
+### ☁️ Cloudflare Worker Setup
 To use the **Stealth Link**, you must deploy a Worker in your Cloudflare account:
 
 1. Create a new **Worker** in Cloudflare Dashboard.
-2. Replace the code with this snippet:
+2. Replace the code with the snippet provided in the [Cloudflare Code](#cloudflare-code) section below.
+3. Save and deploy. Use your `.workers.dev` domain during the script installation.
+
+---
+
+<a name="русский"></a>
+## Русский
+
+Нативный Telegram MTProto прокси с маскировкой WebSocket (через Cloudflare Workers) внутри контейнера Proxmox LXC.
+
+### 🚀 Быстрая установка
+
+Запустите эту команду в консоли (shell) вашего Proxmox:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/solohaims/proxmox-tg-proxy/main/install_tg_proxy.sh)"
+```
+
+### 🛠 Особенности (v2.1)
+- **Русская локализация:** Весь интерфейс и подсказки на русском языке.
+- **Улучшенный UI:** Выбор хранилища и ресурсов с помощью стрелок на клавиатуре.
+- **Повышенная безопасность:** 
+  - Автоматическое создание **непривилегированных** (Unprivileged) контейнеров.
+  - Генерация **случайного пароля root** для каждой установки.
+  - Защита сервиса через Systemd (`ProtectSystem`, `PrivateTmp`).
+- **Профили ресурсов:** Выбор между Эконом, Стандарт или Производительным режимами.
+- **Чистая установка:** Автоматическое удаление мусора и временных зависимостей после сборки.
+- **WS Stealth:** Обход блокировок DPI через Cloudflare Workers.
+- **Автоматизация:** Сам качает шаблоны, ждет сеть и настраивает автозапуск.
+
+### 🏗 Архитектура
+- **Сборка из исходников:** Скрипт клонирует официальный репозиторий [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy) и компилирует библиотеки шифрования (`cryptography`) локально. Это гарантирует прозрачность и безопасность.
+- **Минимальные задержки:** Работает как нативный сервис systemd внутри LXC (без накладных расходов Docker).
+- **Изоляция:** Использует виртуальное окружение Python (venv) для чистоты системы.
+
+### ☁️ Настройка Cloudflare Worker
+Чтобы использовать **Stealth-ссылку**, вам нужно развернуть Worker в вашем аккаунте Cloudflare:
+
+1. Создайте новый **Worker** в панели управления Cloudflare.
+2. Замените его код на фрагмент из раздела [Cloudflare Code](#cloudflare-code).
+3. Сохраните и разверните (Deploy). Используйте ваш домен `.workers.dev` при запуске скрипта.
+
+---
+
+<a name="cloudflare-code"></a>
+### 🛠 Cloudflare Code (Common)
 
 ```javascript
 import { connect } from "cloudflare:sockets";
@@ -53,7 +105,7 @@ export default {
           abort() { server.close(); }
         }));
       }
-      const writer = tcpSocket.writable.getWriter();
+      const writer = tcpSocket.writable.writable.getWriter();
       await writer.write(event.data);
       writer.releaseLock();
     });
@@ -61,7 +113,6 @@ export default {
   }
 };
 ```
-3. Save and deploy. Use your `.workers.dev` domain during the script installation.
 
 ## 📄 Credits
 - Proxy core: [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy)
