@@ -217,6 +217,19 @@ pct exec "$CTID" -- systemctl start tg-proxy
 # Получение IP
 IP=$(pct exec "$CTID" -- ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | head -n 1)
 
+# Формирование ссылок
+DIRECT_LINK="tg://proxy?server=$IP&port=1443&secret=dd$SECRET"
+STEALTH_LINK=""
+if [ -n "$WORKER" ]; then
+    STEALTH_LINK="tg://proxy?server=$WORKER&port=443&secret=dd$SECRET"
+fi
+
+# Проверка и установка qrencode для QR-кодов
+if ! command -v qrencode &>/dev/null; then
+    printf "${BLUE}Установка qrencode для генерации QR-кодов...${NC}\n"
+    apt-get update -qq && apt-get install -y -qq qrencode &>/dev/null || true
+fi
+
 # --- Итоги ---
 header_info
 printf "${GREEN}УСПЕХ! Telegram прокси запущен.${NC}\n"
@@ -225,12 +238,25 @@ printf "ID контейнера: $CTID | Пароль root: $ROOT_PASS\n"
 printf "IP: $IP | Секрет: dd$SECRET\n"
 printf "%s\n" "------------------------------------------------------------"
 printf "${YELLOW}Ссылка для Telegram (Прямая):${NC}\n"
-printf "tg://proxy?server=$IP&port=1443&secret=dd$SECRET\n"
+printf "$DIRECT_LINK\n"
+
+if [ -n "$STEALTH_LINK" ]; then
+    printf "${BLUE}Ссылка Stealth (через Cloudflare):${NC}\n"
+    printf "$STEALTH_LINK\n"
+fi
 printf "%s\n" "------------------------------------------------------------"
 
-if [ -n "$WORKER" ]; then
-    printf "${BLUE}Ссылка Stealth (через Cloudflare):${NC}\n"
-    printf "tg://proxy?server=$WORKER&port=443&secret=dd$SECRET\n"
+# Вывод QR-кода
+if command -v qrencode &>/dev/null; then
+    QR_TARGET=$DIRECT_LINK
+    QR_TEXT="Прямая ссылка"
+    if [ -n "$STEALTH_LINK" ]; then
+        QR_TARGET=$STEALTH_LINK
+        QR_TEXT="Stealth ссылка (Cloudflare)"
+    fi
+    printf "${YELLOW}Отсканируйте QR-код для добавления в Telegram ($QR_TEXT):${NC}\n"
+    qrencode -t ansiutf8 "$QR_TARGET"
     printf "%s\n" "------------------------------------------------------------"
 fi
+
 printf "${BLUE}Подсказка: используйте 'pct enter $CTID' для управления контейнером.${NC}\n"
