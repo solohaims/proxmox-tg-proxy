@@ -63,7 +63,7 @@ select_option() {
   done
   # Показать курсор
   tput cnorm
-  return "$cur"
+  MENU_INDEX=$cur
 }
 
 # --- Проверка окружения ---
@@ -87,12 +87,11 @@ HOSTNAME=${HOSTNAME:-tg-proxy}
 # Выбор хранилища
 STORES=($(pvesm status -content rootdir | awk 'NR>1 {print $1}'))
 select_option "Выберите хранилище для LXC" "${STORES[@]}"
-STORAGE=${STORES[$?]}
+STORAGE=${STORES[$MENU_INDEX]}
 
 # Подтверждение ресурсов
 select_option "Выберите ресурсы" "Стандарт (1 CPU, 512MB RAM)" "Эконом (1 CPU, 256MB RAM)" "Производительный (2 CPU, 1GB RAM)"
-RES_CHOICE=$?
-case $RES_CHOICE in
+case $MENU_INDEX in
   0) CORES=1; MEM=512 ;;
   1) CORES=1; MEM=256 ;;
   2) CORES=2; MEM=1024 ;;
