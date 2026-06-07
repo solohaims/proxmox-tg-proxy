@@ -58,7 +58,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/solohaims/proxmox-tg-pro
   - Автоматическое создание **непривилегированных** (Unprivileged) контейнеров.
   - Генерация **случайного пароля root** для каждой установки.
   - Защита сервиса через Systemd (`ProtectSystem`, `PrivateTmp`).
-- **Профили ресурсов:** Выбор между Эконом, Стандарт или Производительным режимами.
+- **Профили ресурсов:** Выбор между Мини (128MB RAM, 2GB Disk), Стандарт (256MB RAM, 4GB Disk) или Производительным (512MB RAM, 8GB Disk) режимами.
 - **Чистая установка:** Автоматическое удаление мусора и временных зависимостей после сборки.
 - **WS Stealth:** Обход блокировок DPI через Cloudflare Workers.
 - **Автоматизация:** Сам качает шаблоны, ждет сеть и настраивает автозапуск.
@@ -117,3 +117,4 @@ export default {
 ## 📄 Credits
 - Proxy core: [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy)
 - Script inspired by [Proxmox VE Helper Scripts](https://tteck.github.io/Proxmox/)
+ox/)
