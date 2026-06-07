@@ -204,17 +204,17 @@ IP=$(pct exec "$CTID" -- ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){
 # --- Итоги ---
 header_info
 printf "${GREEN}УСПЕХ! Telegram прокси запущен.${NC}\n"
-printf "------------------------------------------------------------\n"
+printf "%s\n" "------------------------------------------------------------"
 printf "ID контейнера: $CTID | Пароль root: $ROOT_PASS\n"
 printf "IP: $IP | Секрет: dd$SECRET\n"
-printf "------------------------------------------------------------\n"
+printf "%s\n" "------------------------------------------------------------"
 printf "${YELLOW}Ссылка для Telegram (Прямая):${NC}\n"
 printf "tg://proxy?server=$IP&port=1443&secret=dd$SECRET\n"
-printf "------------------------------------------------------------\n"
+printf "%s\n" "------------------------------------------------------------"
 
 if [ -n "$WORKER" ]; then
     printf "${BLUE}Ссылка Stealth (через Cloudflare):${NC}\n"
     printf "tg://proxy?server=$WORKER&port=443&secret=dd$SECRET\n"
-    printf "------------------------------------------------------------\n"
+    printf "%s\n" "------------------------------------------------------------"
 fi
 printf "${BLUE}Подсказка: используйте 'pct enter $CTID' для управления контейнером.${NC}\n"
