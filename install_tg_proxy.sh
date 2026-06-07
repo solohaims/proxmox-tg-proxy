@@ -255,7 +255,7 @@ if command -v qrencode &>/dev/null; then
         QR_TEXT="Stealth ссылка (Cloudflare)"
     fi
     printf "${YELLOW}Отсканируйте QR-код для добавления в Telegram ($QR_TEXT):${NC}\n"
-    qrencode -t ansiutf8 "$QR_TARGET"
+    qrencode -t UTF8i -l L "$QR_TARGET"
     printf "%s\n" "------------------------------------------------------------"
 fi
 
