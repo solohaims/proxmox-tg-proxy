@@ -88,16 +88,19 @@ HOSTNAME=${HOSTNAME:-tg-proxy}
 STORES=($(pvesm status -content rootdir | awk 'NR>1 {print $1}'))
 select_option "Выберите хранилище для LXC" "${STORES[@]}"
 STORAGE=${STORES[$MENU_INDEX]}
-
 # Подтверждение ресурсов
-select_option "Выберите ресурсы" "Стандарт (1 CPU, 512MB RAM)" "Эконом (1 CPU, 256MB RAM)" "Производительный (2 CPU, 1GB RAM)"
+select_option "Выберите профиль ресурсов" \
+  "Мини (128MB RAM, 2GB Disk) - для семьи" \
+  "Стандарт (256MB RAM, 4GB Disk) - до 10-20 чел" \
+  "Максимум (512MB RAM, 8GB Disk) - для больших групп"
 case $MENU_INDEX in
-  0) CORES=1; MEM=512 ;;
-  1) CORES=1; MEM=256 ;;
-  2) CORES=2; MEM=1024 ;;
+  0) CORES=1; MEM=128; DISK=2 ;;
+  1) CORES=1; MEM=256; DISK=4 ;;
+  2) CORES=1; MEM=512; DISK=8 ;;
 esac
 
 GEN_SECRET=$(openssl rand -hex 16)
+
 printf "${YELLOW}Секрет прокси [По умолчанию: $GEN_SECRET] (Enter для пропуска): ${NC}"
 read -r SECRET < /dev/tty
 SECRET=${SECRET:-$GEN_SECRET}
